@@ -21,13 +21,13 @@ fix or improvement. For example, author hasn't even figure out the lowest langua
 Include the main header in your project:
 
 ```cpp
-#include <char_db.hpp>
+#include <char_db.hh>
 ```
 
 Example: Iterate over UTF-8 code points in a string
 
 ```cpp
-#include <char_db.hpp>
+#include <char_db.hh>
 #include <string_view>
 #include <print>
 

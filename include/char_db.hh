@@ -16,5 +16,5 @@
 
 #pragma once
 
-#include "char_db/database.hpp"
-#include "char_db/views.hpp"
+#include "char_db/database.hh"
+#include "char_db/views.hh"
