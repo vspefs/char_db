@@ -11,7 +11,7 @@ fix or improvement. For example, author hasn't even figure out the lowest langua
 
 - Header-only, zero-dependency (except standard library)
 - Built-in Unicode character validation and code point conversion for UTF-8, UTF-16, UTF-32
-- Range-based `decoding` view for iterating subsequences that encodes an Unicode character
+- Range-based views for iterating subsequences that encodes Unicode characters
 - Designed for constexpr and compile-time usage (though no such view has been implemented now)
 - Official integration to a wide range of build systems (which isn't there yet)
 - C++20 module support (can you believe I'm lazy enough to not have done this?)
@@ -35,7 +35,7 @@ int
 main ()
 {
   using namespace std::literals;
-  static auto seq = u8"Hello, 🌍!"sv;
+  auto seq = u8"Hello, 🌍!"sv;
   for (auto subseq : seq | char_db::views::decoding<char_db::utf8>)
     {
       auto cp = char_db::utf8::to_code_point (subseq);
@@ -66,6 +66,7 @@ cmake --build build
 
 - `char_db::utf8`, `char_db::utf16`, `char_db::utf32`: Static interfaces for encoding/decoding and validation
 - `char_db::views::decoding<Db>`: Range adaptor for decoding code unit sequences into code points
+- `char_db::views::decoded<Db>`: Range adaptor for iterating decoded code unit sequences that represent valid Unicode code points
 
 ## Contributing
 
