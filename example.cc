@@ -27,7 +27,7 @@ main ()
 {
   using namespace std::literals::string_view_literals;
 
-  static constexpr auto seq = u8"👍 I'm a UTF-8 code unit sequence!! ❤❤"sv;
+  constexpr auto seq = u8"👍 I'm a UTF-8 code unit sequence!! ❤❤"sv;
   constexpr auto code_points = U"👍 I'm a UTF-8 code unit sequence!! ❤❤"sv;
 
   for (auto view = seq | char_db::views::decoding<char_db::utf8>;

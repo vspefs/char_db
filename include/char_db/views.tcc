@@ -162,6 +162,119 @@ requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
     return std::ranges::begin (base_);
   }
 
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr decoded_view<Db, V>::iterator::iterator (decoded_view &parent,
+                                                     std::size_t const rank)
+  : parent_ (std::addressof (parent)), rank_ (rank)
+  {
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr decoded_view<Db, V>::iterator::value_type
+  decoded_view<Db, V>::iterator::operator* () const
+  {
+    auto const this_iter = std::ranges::next (parent_->base ().begin (),
+                                              parent_->book_.select (rank_));
+    auto const next_iter = std::ranges::next (parent_->base ().begin (),
+                                              parent_->book_.select (rank_ + 1));
+    return std::ranges::subrange (this_iter, next_iter);
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr decoded_view<Db, V>::iterator &
+  decoded_view<Db, V>::iterator::operator++ ()
+  {
+    if (parent_->end () != *this)
+      ++rank_;
+    return *this;
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr decoded_view<Db, V>::iterator
+  decoded_view<Db, V>::iterator::operator++ (int)
+  {
+    auto tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr decoded_view<Db, V>::iterator &
+  decoded_view<Db, V>::iterator::operator-- ()
+  {
+    if (std::ranges::begin (parent_->base ()) != *this)
+      --rank_;
+    return *this;
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr decoded_view<Db, V>::iterator
+  decoded_view<Db, V>::iterator::operator-- (int)
+  {
+    auto tmp = *this;
+    --(*this);
+    return tmp;
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr decoded_view<Db, V>::decoded_view (V base)
+  : base_ (std::move (base)), book_ ()
+  {
+    using dynamic_bitset = std::vector<bool>;
+    dynamic_bitset book (std::ranges::size (base_), false);
+
+    auto const begin = std::ranges::cbegin (base_);
+    auto const end = std::ranges::cend (base_);
+    std::size_t index = 0;
+    for (auto iter = begin; iter != end; ++iter, ++index)
+      if (Db::starts_with_valid_char (std::ranges::subrange (iter, end)))
+        book[index] = true;
+
+    book_ = _container::succinct_bitset<std::dynamic_extent> (std::from_range, std::move (book));
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr V
+  decoded_view<Db, V>::base () const & requires std::copy_constructible<V>
+  {
+    return base_;
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr V
+  decoded_view<Db, V>::base () &&
+  {
+    return std::move (base_);
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr decoded_view<Db, V>::iterator
+  decoded_view<Db, V>::begin ()
+  {
+    return iterator (*this, 0);
+  }
+
+template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  constexpr auto
+  decoded_view<Db, V>::end ()
+  {
+    if constexpr (std::ranges::common_range<V>)
+      return iterator (*this, book_.count ());
+    else
+      return std::default_sentinel;
+  }
+
 } // namespace char_db
 
 
@@ -174,6 +287,14 @@ template <typename Db>
     _decoding_adaptor<Db>::operator() (R &&r) const
     {
       return decoding_view<Db, std::ranges::views::all_t<R>> (std::views::all (std::forward<R> (r)));
+    }
+
+template <typename Db>
+  template <std::ranges::viewable_range R>
+    constexpr auto
+    _decoded_adaptor<Db>::operator() (R &&r) const
+    {
+      return decoded_view<Db, std::ranges::views::all_t<R>> (std::views::all (std::forward<R> (r)));
     }
 
 } // namespace char_db::views::_detail

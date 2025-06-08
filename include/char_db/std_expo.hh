@@ -55,6 +55,10 @@ requires std::move_constructible<T> && std::is_object_v<T>
       noexcept (std::is_nothrow_move_constructible_v<T>);
   };
 
+template <typename R, typename T>
+  concept container_compatible_range =
+    std::ranges::input_range<R> && std::convertible_to<std::ranges::range_reference_t<R>, T>;
+
 } // namespace char_db::std_expo
 
 #include "std_expo.tcc"
