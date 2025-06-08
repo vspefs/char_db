@@ -35,8 +35,8 @@ int
 main ()
 {
   using namespace std::literals;
-  auto seq = u8"Hello, 🌍!"sv;
-  for (auto subseq : seq | char_db::views::decoding<char_db::utf8> ())
+  static auto seq = u8"Hello, 🌍!"sv;
+  for (auto subseq : seq | char_db::views::decoding<char_db::utf8>)
     {
       auto cp = char_db::utf8::to_code_point (subseq);
       auto mblen = std::ranges::size (subseq);
