@@ -14,6 +14,7 @@ template <std::size_t N>
   class succinct_bitset
   {
   public:
+    constexpr succinct_bitset () = default;
     constexpr explicit succinct_bitset (std::from_range_t, std_expo::container_compatible_range<bool> auto &&);
 
     [[nodiscard]] consteval std::size_t size () const noexcept;
@@ -21,14 +22,14 @@ template <std::size_t N>
     [[nodiscard]] constexpr bool at (std::size_t) const noexcept;
 
     // Returns the number of bits equal to Value in [0, pos).
-    template <bool Value>
+    template <bool Value = true>
       [[nodiscard]] constexpr std::size_t rank (std::size_t) const noexcept;
 
     // Returns the position of the (k+1)th bit equal to Value.
-    template <bool Value>
+    template <bool Value = true>
       [[nodiscard]] constexpr std::size_t select (std::size_t) const noexcept;
 
-  public:
+  private:
     using uintword_t = std::uintptr_t;
     static constexpr std::size_t word_bit_size = CHAR_BIT * sizeof (uintword_t);
     static constexpr std::size_t l2_bit_size = word_bit_size;
@@ -44,6 +45,7 @@ template <>
   class succinct_bitset<std::dynamic_extent>
   {
   public:
+    constexpr succinct_bitset () = default;
     constexpr explicit succinct_bitset (std::from_range_t, std_expo::container_compatible_range<bool> auto &&);
 
     [[nodiscard]] constexpr std::size_t size () const noexcept;
@@ -51,11 +53,11 @@ template <>
     [[nodiscard]] constexpr bool at (std::size_t) const noexcept;
 
     // Returns the number of bits equal to Value in [0, pos).
-    template <bool Value>
+    template <bool Value = true>
       [[nodiscard]] constexpr std::size_t rank (std::size_t) const noexcept;
 
     // Returns the position of the (k+1)th bit equal to Value.
-    template <bool Value>
+    template <bool Value = true>
       [[nodiscard]] constexpr std::size_t select (std::size_t) const noexcept;
 
   private:
