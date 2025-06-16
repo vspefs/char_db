@@ -13,7 +13,7 @@ fix or improvement. For example, author hasn't even figure out the lowest langua
 - Built-in Unicode character validation and code point conversion for UTF-8, UTF-16, UTF-32
 - Range-based views for iterating subsequences that encodes Unicode characters
 - Designed for constexpr and compile-time usage (though no such view has been implemented now)
-- Official integration to a wide range of build systems (which isn't there yet)
+- Official integration to a wide range of build systems (we have 2 now I guess that's a win)
 - C++20 module support (can you believe I'm lazy enough to not have done this?)
 
 ## Usage
