@@ -44,5 +44,10 @@ cmake-build-*/
 
 .vscode/
 
+.clang-tidy
 .clang-format
 .clangd
+
+.python-version
+.venv/
+uv.lock

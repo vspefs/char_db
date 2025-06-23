@@ -248,7 +248,7 @@ succinct_bitset<std::dynamic_extent>::at(std::size_t pos) const noexcept
 template <bool Value>
   constexpr std::size_t succinct_bitset<std::dynamic_extent>::rank(std::size_t pos) const noexcept
   {
-    pos = std::min(pos, total_bits_);
+    pos = std::min (pos, total_bits_);
     std::size_t res = 0;
     std::size_t l1_blocks = pos / l1_bit_size;
     std::size_t l2_blocks = pos / l2_bit_size;
@@ -262,14 +262,14 @@ template <bool Value>
         if (l2_blocks)
           res += l2_[l2_blocks - 1];
         for (std::size_t i = l2_blocks * (l2_bit_size / word_bit_size); i < word_idx; ++i)
-          res += std::popcount(bits_[i]);
+          res += std::popcount (bits_[i]);
         if (bit_idx)
-          res += std::popcount(bits_[word_idx] & ((static_cast<uintword_t> (1) << bit_idx) - 1));
+          res += std::popcount (bits_[word_idx] & ((static_cast<uintword_t> (1) << bit_idx) - 1));
         return res;
       }
     else
       {
-        return pos - rank<true>(pos);
+        return pos - rank<true> (pos);
       }
   }
 

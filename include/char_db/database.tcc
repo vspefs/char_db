@@ -263,10 +263,10 @@ requires std::same_as<char8_t, std::ranges::range_value_t<R>>
       }
 
     auto const assigned_ranges =
-      trivial_mblen == 1 ? assigned_ranges_1.data () :
-      trivial_mblen == 2 ? assigned_ranges_2.data () :
-      trivial_mblen == 3 ? assigned_ranges_3.data () :
-      assigned_ranges_4.data ();
+        trivial_mblen == 1 ? assigned_ranges_1.data () :
+        trivial_mblen == 2 ? assigned_ranges_2.data () :
+        trivial_mblen == 3 ? assigned_ranges_3.data () :
+        assigned_ranges_4.data ();
 
     std::size_t low = 0;
     std::size_t high = trivial_mblen == 1 ? assigned_ranges_1.size () :
