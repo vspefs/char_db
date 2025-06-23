@@ -82,9 +82,9 @@ requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
     std_expo::non_propagating_cache<std::ranges::iterator_t<V>> begin_;
   };
 
-template <typename Db, std::ranges::forward_range V>
+template <typename Db, std::size_t N, std::ranges::forward_range V>
 requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
-  class decoded_view : public std::ranges::view_interface<decoded_view<Db, V>>
+  class decoded_view : public std::ranges::view_interface<decoded_view<Db, N, V>>
   {
   public:
     class iterator
@@ -126,9 +126,10 @@ requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
     constexpr V base () &&;
     constexpr iterator begin ();
     constexpr auto end ();
+    [[nodiscard]] constexpr std::size_t size () const noexcept;
   private:
     V base_;
-    _container::succinct_bitset<std::dynamic_extent> book_;
+    _container::succinct_bitset<N> book_;
   };
 
 } // namespace char_db
@@ -144,7 +145,7 @@ template <typename Db>
       constexpr auto operator() (R &&r) const;
   };
 
-}
+} // namespace char_db::views::_detail
 
 template <typename Db>
   inline constexpr _detail::_decoding_adaptor<Db> decoding {};
@@ -152,16 +153,16 @@ template <typename Db>
 namespace _detail {
 
 template <typename Db>
-  struct _decoded_adaptor : public std::ranges::range_adaptor_closure<_decoding_adaptor<Db>>
+  struct _decoded_adaptor : public std::ranges::range_adaptor_closure<_decoded_adaptor<Db>>
   {
     template <std::ranges::viewable_range R>
       constexpr auto operator() (R &&r) const;
   };
 
-}
+} // namespace char_db::views::_detail
 
 template <typename Db>
-  inline constexpr _detail::_decoding_adaptor<Db> decoded {};
+  inline constexpr _detail::_decoded_adaptor<Db> decoded {};
 
 } // namespace char_db::views
 
