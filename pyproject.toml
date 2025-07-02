@@ -1,0 +1,9 @@
+[project]
+name = "char-db"
+version = "0.1.0"
+description = "Scripts and Python environment needed by char_db"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "requests>=2.32.3",
+]
