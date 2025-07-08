@@ -1,6 +1,6 @@
 # char_db (WIP)
 
-A modern C++ header-only library for general encoding/decoding of characters, built around native language features
+A modern C++ module library for general encoding/decoding of characters, built around native language features
 like `char8_t`, `char16_t`, `char32_t`, and ranges, with built-in support for UTF-8, UTF-16, and UTF-32.
 
 The author is a lazy dumb ass and this library is still a work in progress, which leave vast room for contribution, bug
@@ -9,45 +9,64 @@ fix or improvement. For example, author hasn't even figure out the lowest langua
 
 ## Features
 
-- Header-only, zero-dependency (except standard library)
+- C++20 module, zero-dependency (except standard library)
 - Built-in Unicode character validation and code point conversion for UTF-8, UTF-16, UTF-32
 - Range-based views for iterating subsequences that encodes Unicode characters
 - Designed for constexpr and compile-time usage (though no such view has been implemented now)
-- Official integration to a wide range of build systems (we have 2 now I guess that's a win)
-- C++20 module support (can you believe I'm lazy enough to not have done this?)
+- (BIG CHANGE!) Sorry! CMake DSL is dogshit but as the library tries to look cool as possible by only providing itself in C++20 modules, CMake is again our only supported build system now!
 
 ## Usage
 
-Include the main header in your project:
+After installation, find the package and link against it in CMake:
+
+```cmake
+find_package (char_db REQUIRED)
+
+# ...
+
+target_link_libraries (
+    your_awesome_target
+    PRIVATE
+        char_db::char_db
+)
+```
+
+Then you can import the module in your source files:
 
 ```cpp
-#include <char_db.hh>
+import vspefs.char_db;
 ```
 
 Example: Iterate over UTF-8 code points in a string
 
 ```cpp
-#include <char_db.hh>
-#include <string_view>
-#include <print>
+import vspefs.char_db;
+import std;
 
 int
 main ()
 {
-  using namespace std::literals;
-  auto seq = u8"Hello, 🌍!"sv;
-  for (auto subseq : seq | char_db::views::decoding<char_db::utf8>)
+  using namespace std::literals::string_view_literals;
+
+  constexpr auto seq = u8"👍 I'm a UTF-8 code unit sequence!! ❤❤"sv;
+  constexpr auto code_points = U"👍 I'm a UTF-8 code unit sequence!! ❤❤"sv;
+
+  for (auto view = seq | char_db::views::decoding<char_db::utf8>;
+       auto const [index, subseq] : view | std::views::enumerate)
     {
-      auto cp = char_db::utf8::to_code_point (subseq);
-      auto mblen = std::ranges::size (subseq);
-      std::println ("U+{:04X}, using {} UTF-8 code units", static_cast<std::uint32_t>(cp), mblen);
+      std::ranges::for_each (subseq, [] (char8_t const code_unit)
+        {
+          std::print ("{:#04x} ", static_cast<std::uint8_t> (code_unit));
+        });
+      std::print ("-> {} ", static_cast<std::uint32_t> (char_db::utf8::to_code_point (subseq)));
+      std::println ("{}", char_db::utf8::to_code_point (subseq) == code_points[index]);
     }
 }
 ```
 
 ## Building & Installing
 
-This project uses CMake:
+This project now only uses CMake:
 
 ```sh
 cmake -B build
@@ -55,10 +74,15 @@ cmake --build build
 cmake --install build
 ```
 
-To build the example, enable the `BUILD_EXAMPLE` option:
+To specify the library build type:
 
 ```sh
-cmake -B build -DBUILD_EXAMPLE=ON
+# as a shared library
+cmake -B build -DBUILD_SHARED_LIBS=ON
+cmake --build build
+
+# as a static library
+cmake -B build -DBUILD_SHARED_LIBS=OFF
 cmake --build build
 ```
 

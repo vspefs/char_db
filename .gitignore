@@ -46,3 +46,7 @@ cmake-build-*/
 
 .clang-format
 .clangd
+.cache/
+
+uv.lock
+.venv/

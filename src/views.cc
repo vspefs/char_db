@@ -1,24 +1,114 @@
-//  char_db, the general encoding/decoding C++ library
-//  Copyright (C) 2025 vspefs<vspefs@protonmail.com>
-//
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU Affero General Public License as
-//  published by the Free Software Foundation, either version 3 of the
-//  License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU Affero General Public License for more details.
-//
-//  You should have received a copy of the GNU Affero General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+export module vspefs.char_db : views;
 
-#pragma once
-
-#include "views.hh"
+import : utils;
+import : containers;
+import : database;
+import std;
 
 namespace char_db {
+
+export template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  class decoding_view : public std::ranges::view_interface<decoding_view<Db, V>>
+  {
+  public:
+    class iterator
+    {
+    public:
+      using value_type = std::ranges::subrange<std::ranges::iterator_t<V>>;
+      using difference_type = std::ranges::range_difference_t<V>;
+      using iterator_concept = std::conditional_t<std::ranges::bidirectional_range<V>,
+                                                  std::bidirectional_iterator_tag,
+                                                  std::forward_iterator_tag>;
+      friend class decoding_view;
+    public:
+      iterator () = default;
+
+      constexpr value_type operator* () const;
+      constexpr iterator &operator++ ();
+      constexpr iterator operator++ (int);
+      constexpr iterator &operator-- () requires std::ranges::bidirectional_range<V>;
+      constexpr iterator operator-- (int) requires std::ranges::bidirectional_range<V>;
+
+      friend constexpr bool operator== (iterator const &x, iterator const &y)
+      {
+        return x.current_ == y.next_;
+      }
+      friend constexpr bool operator== (iterator const &x, std::default_sentinel_t)
+      {
+        return x.current_ == x.next_;
+      }
+    private:
+      constexpr iterator (decoding_view &, std::ranges::iterator_t<V>, std::ranges::iterator_t<V>);
+
+      decoding_view *parent_;
+      std::ranges::iterator_t<V> current_;
+      std::ranges::iterator_t<V> next_;
+    };
+    using char_type = std::ranges::range_value_t<V>;
+  public:
+    decoding_view () requires std::default_initializable<V> = default;
+    constexpr explicit decoding_view (V);
+
+    constexpr V base () const & requires std::copy_constructible<V>;
+    constexpr V base () &&;
+    constexpr iterator begin ();
+    constexpr auto end ();
+  private:
+    constexpr std::ranges::iterator_t<V> find_next (std::ranges::iterator_t<V>);
+    constexpr std::ranges::iterator_t<V> find_prev (std::ranges::iterator_t<V>) requires std::ranges::bidirectional_range<V>;
+    V base_;
+    utils::non_propagating_cache<std::ranges::iterator_t<V>> begin_;
+  };
+
+export template <typename Db, std::ranges::forward_range V>
+requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
+  class decoded_view : public std::ranges::view_interface<decoded_view<Db, V>>
+  {
+  public:
+    class iterator
+    {
+    public:
+      using value_type = std::ranges::subrange<std::ranges::iterator_t<V>>;
+      using difference_type = std::ranges::range_difference_t<V>;
+      using iterator_concept = std::bidirectional_iterator_tag;
+      friend class decoded_view;
+    public:
+      iterator () = default;
+
+      constexpr value_type operator* () const;
+      constexpr iterator &operator++ ();
+      constexpr iterator operator++ (int);
+      constexpr iterator &operator-- ();
+      constexpr iterator operator-- (int);
+
+      friend constexpr bool operator== (iterator const &x, iterator const &y)
+      {
+        return x.rank_ == y.rank_;
+      }
+      friend constexpr bool operator== (iterator const &x, std::default_sentinel_t)
+      {
+        return x.rank_ == x.parent_->book_.count ();
+      }
+    private:
+      constexpr iterator (decoded_view &, std::size_t);
+
+      decoded_view *parent_;
+      std::size_t rank_;
+    };
+    using char_type = std::ranges::range_value_t<V>;
+  public:
+    decoded_view () requires std::default_initializable<V> = default;
+    constexpr explicit decoded_view (V);
+
+    constexpr V base () const & requires std::copy_constructible<V>;
+    constexpr V base () &&;
+    constexpr iterator begin ();
+    constexpr auto end ();
+  private:
+    V base_;
+    containers::succinct_bitset<std::dynamic_extent> book_;
+  };
 
 template <typename Db, std::ranges::forward_range V>
 requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
@@ -237,7 +327,7 @@ requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
       if (Db::starts_with_valid_char (std::ranges::subrange (iter, end)))
         book[index] = true;
 
-    book_ = _container::succinct_bitset<std::dynamic_extent> (std::from_range, std::move (book));
+    book_ = containers::succinct_bitset<std::dynamic_extent> (std::from_range, std::move (book));
   }
 
 template <typename Db, std::ranges::forward_range V>
@@ -277,25 +367,34 @@ requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
 
 } // namespace char_db
 
-
-
-namespace char_db::views::_detail {
+namespace char_db::views {
 
 template <typename Db>
-  template <std::ranges::viewable_range R>
-    constexpr auto
-    _decoding_adaptor<Db>::operator() (R &&r) const
-    {
-      return decoding_view<Db, std::ranges::views::all_t<R>> (std::views::all (std::forward<R> (r)));
-    }
+  struct decoding_adaptor : public std::ranges::range_adaptor_closure<decoding_adaptor<Db>>
+  {
+    template <std::ranges::viewable_range R>
+      constexpr auto operator() (R &&r) const
+      {
+        return decoding_view<Db, std::ranges::views::all_t<R>> (std::views::all (std::forward<R> (r)));
+      }
+  };
 
 template <typename Db>
-  template <std::ranges::viewable_range R>
-    constexpr auto
-    _decoded_adaptor<Db>::operator() (R &&r) const
-    {
-      return decoded_view<Db, std::ranges::views::all_t<R>> (std::views::all (std::forward<R> (r)));
-    }
+  struct decoded_adaptor : public std::ranges::range_adaptor_closure<decoding_adaptor<Db>>
+  {
+    template <std::ranges::viewable_range R>
+      constexpr auto operator() (R &&r) const
+      {
+        return decoded_view<Db, std::ranges::views::all_t<R>> (std::views::all (std::forward<R> (r)));
+      }
+  };
 
-} // namespace char_db::views::_detail
 
+export {
+
+template <typename Db> inline constexpr decoding_adaptor<Db> decoding {};
+template <typename Db> inline constexpr decoding_adaptor<Db> decoded {};
+
+} // export
+
+} // namespace char_db::views

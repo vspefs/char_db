@@ -1,15 +1,79 @@
-#pragma once
+module;
+#include <climits>
 
-#include "succinct_bitset.hh"
+module vspefs.char_db : containers;
 
-#include <bit>
-#include <algorithm>
+import : utils;
+import std;
 
-namespace char_db::_container {
+namespace char_db::containers {
 
 template <std::size_t N>
-  constexpr succinct_bitset<N>::succinct_bitset(std::from_range_t,
-                                                std_expo::container_compatible_range<bool> auto &&bits)
+  class succinct_bitset
+  {
+  public:
+    constexpr succinct_bitset () = default;
+    constexpr explicit succinct_bitset (std::from_range_t, utils::container_compatible_range<bool> auto &&);
+
+    [[nodiscard]] consteval std::size_t size () const noexcept;
+    [[nodiscard]] constexpr std::size_t count () const noexcept;
+    [[nodiscard]] constexpr bool at (std::size_t) const noexcept;
+
+    // Returns the number of bits equal to Value in [0, pos).
+    template <bool Value = true>
+    [[nodiscard]] constexpr std::size_t rank (std::size_t) const noexcept;
+
+    // Returns the position of the (k+1)th bit equal to Value.
+    template <bool Value = true>
+    [[nodiscard]] constexpr std::size_t select (std::size_t) const noexcept;
+
+  private:
+    using uintword_t = std::uintptr_t;
+    static constexpr std::size_t word_bit_size = CHAR_BIT * sizeof (uintword_t);
+    static constexpr std::size_t l2_bit_size = word_bit_size;
+    static constexpr std::size_t l1_bit_size = 64 * l2_bit_size;
+
+    std::array<uintword_t, (N - 1) / word_bit_size + 1> bits_;
+    std::array<std::size_t, (N - 1) / l1_bit_size + 1> l1_;
+    std::array<std::uint16_t, (N - 1) / l2_bit_size + 1> l2_;
+    std::size_t total_set_bits_ = 0;
+  };
+
+template <>
+  class succinct_bitset<std::dynamic_extent>
+  {
+  public:
+    constexpr succinct_bitset () = default;
+    constexpr explicit succinct_bitset (std::from_range_t, utils::container_compatible_range<bool> auto &&);
+
+    [[nodiscard]] constexpr std::size_t size () const noexcept;
+    [[nodiscard]] constexpr std::size_t count () const noexcept;
+    [[nodiscard]] constexpr bool at (std::size_t) const noexcept;
+
+    // Returns the number of bits equal to Value in [0, pos).
+    template <bool Value = true>
+    [[nodiscard]] constexpr std::size_t rank (std::size_t) const noexcept;
+
+    // Returns the position of the (k+1)th bit equal to Value.
+    template <bool Value = true>
+    [[nodiscard]] constexpr std::size_t select (std::size_t) const noexcept;
+
+  private:
+    using uintword_t = std::uintptr_t;
+    static constexpr std::size_t word_bit_size = CHAR_BIT * sizeof (uintword_t);
+    static constexpr std::size_t l2_bit_size = word_bit_size;
+    static constexpr std::size_t l1_bit_size = 64 * l2_bit_size;
+
+    std::size_t total_bits_ = 0;
+    std::vector<uintword_t> bits_;
+    std::vector<std::size_t> l1_;
+    std::vector<std::uint16_t> l2_;
+    std::size_t total_set_bits_ = 0;
+  };
+
+template <std::size_t N>
+  constexpr succinct_bitset<N>::succinct_bitset(
+      std::from_range_t, utils::container_compatible_range<bool> auto &&bits)
   : bits_ (), l1_ (), l2_ ()
   {
     std::size_t l1_idx = 0;
@@ -171,7 +235,7 @@ template <std::size_t N>
 
 
 constexpr succinct_bitset<std::dynamic_extent>::succinct_bitset(
-    std::from_range_t, std_expo::container_compatible_range<bool> auto &&bits)
+    std::from_range_t, utils::container_compatible_range<bool> auto &&bits)
 : total_bits_ (std::ranges::size (bits)),
   bits_ ((total_bits_ - 1) / word_bit_size + 1, 0),
   l1_ ((total_bits_ - 1) / l1_bit_size + 1, 0),
@@ -330,5 +394,4 @@ template <bool Value>
     return total_bits_;
   }
 
-
-} // namespace char_db::_container
+} // namespace char_db::containers

@@ -128,14 +128,8 @@ def main():
     ]
     just_ranges: list[tuple[int, int]] = codepoints_to_ranges(just_codepoints)
 
-    # meson expects custom target outputs to reside in its secret @OUTDIR@ to
-    # manage them correctly,
-    # but as a header-only library, we also want these files to be included
-    # correctly while being consumed by other projects as a meson dependency.
-    #
-    # so we'd want to write the output files to multiple directories. in this
-    # case, one is @OUTDIR@ and another is meson.project_build_dir(). first is
-    # for installation, second is for char_db meson dependency's `include_directories`.
+    # we needed multiple output directories for meson. now only cmake is
+    # supported but i guess it's whatever.
     for output_dir in sys.argv[2:]:
         os.makedirs(output_dir, exist_ok=True)
         with open(os.path.join(output_dir, "bmp_ranges.inc"), "w") as f:
