@@ -83,7 +83,7 @@ template <std::size_t N>
     uintword_t word = 0;
     std::size_t word_pos = 0;
 
-    for (auto const [index, bit] : bits | std::views::enumerate)
+    for (auto const [index, bit] : bits | utils::views::enumerate)
       {
         if (bit)
           {
@@ -248,7 +248,7 @@ constexpr succinct_bitset<std::dynamic_extent>::succinct_bitset(
   uintword_t word = 0;
   std::size_t word_pos = 0;
 
-  for (auto const [index, bit] : bits | std::views::enumerate)
+  for (auto const [index, bit] : bits | utils::views::enumerate)
     {
       if (bit)
         {

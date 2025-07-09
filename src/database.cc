@@ -74,7 +74,10 @@ public:
 
 private:
   static constexpr auto assigned_ranges = std::to_array<assigned_range_t> ({
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #include <char_db/generated/just_ranges.inc>
+#pragma clang diagnostic pop
       });
 };
 
@@ -123,10 +126,16 @@ public:
 
 private:
   static constexpr auto bmp_assigned_ranges = std::to_array<assigned_range_t> ({
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #include <char_db/generated/bmp_ranges.inc>
+#pragma clang diagnostic pop
       });
   static constexpr auto non_bmp_assigned_ranges = std::to_array<assigned_range_t> ({
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #include <char_db/generated/non_bmp_ranges.inc>
+#pragma clang diagnostic pop
       });
   static constexpr auto high_surrogate_range = surrogate_range_t { 0xD800u, 0xDC00u };
   static constexpr auto low_surrogate_range = surrogate_range_t { 0xDC00u, 0xE000u };
@@ -164,16 +173,28 @@ public:
 
 private:
   static constexpr auto assigned_ranges_1 = std::to_array<assigned_range_t> ({
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #include <char_db/generated/utf8_ranges_1.inc>
+#pragma clang diagnostic pop
       });
   static constexpr auto assigned_ranges_2 = std::to_array<assigned_range_t> ({
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #include <char_db/generated/utf8_ranges_2.inc>
+#pragma clang diagnostic pop
       });
   static constexpr auto assigned_ranges_3 = std::to_array<assigned_range_t> ({
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #include <char_db/generated/utf8_ranges_3.inc>
+#pragma clang diagnostic pop
       });
   static constexpr auto assigned_ranges_4 = std::to_array<assigned_range_t> ({
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #include <char_db/generated/utf8_ranges_4.inc>
+#pragma clang diagnostic pop
       });
 };
 

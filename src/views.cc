@@ -1,7 +1,11 @@
 export module vspefs.char_db : views;
 
-import : utils;
-import : containers;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wimport-implementation-partition-unit-in-interface-unit"
+  import : utils;
+  import : containers;
+#pragma clang diagnostic pop
+
 import : database;
 import std;
 
