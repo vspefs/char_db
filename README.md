@@ -4,8 +4,7 @@ A modern C++ module library for general encoding/decoding of characters, built a
 like `char8_t`, `char16_t`, `char32_t`, and ranges, with built-in support for UTF-8, UTF-16, and UTF-32.
 
 The author is a lazy dumb ass and this library is still a work in progress, which leave vast room for contribution, bug
-fix or improvement. For example, author hasn't even figure out the lowest language standard supported. See
-[TODO](TODO.md) for a to-do list.
+fix or improvement. See [TODO](TODO.md) for a to-do list.
 
 ## Features
 
@@ -13,9 +12,13 @@ fix or improvement. For example, author hasn't even figure out the lowest langua
 - Built-in Unicode character validation and code point conversion for UTF-8, UTF-16, UTF-32
 - Range-based views for iterating subsequences that encodes Unicode characters
 - Designed for constexpr and compile-time usage (though no such view has been implemented now)
-- (BIG CHANGE!) Sorry! CMake DSL is dogshit but as the library tries to look cool as possible by only providing itself in C++20 modules, CMake is again our only supported build system now!
+- (BIG CHANGE!) Sorry! CMake DSL is dogshit but as the library tries to look cool as possible by only providing itself
+  in C++20 modules, CMake is again our only supported build system now!
 
 ## Usage
+
+Your project must use exact C++23 standard and no additional compiler flag that will break CMI compatibility, because
+CMade devs and C++ community haven't really come up with a good enough model for module distribution.
 
 After installation, find the package and link against it in CMake:
 
