@@ -1,7 +1,7 @@
 module;
 #include <climits>
 
-module vspefs.char_db : containers;
+export module vspefs.char_db : containers;
 
 import : utils;
 import std;

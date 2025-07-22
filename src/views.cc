@@ -36,7 +36,7 @@ requires std::ranges::view<V> && database_of<Db, std::ranges::range_value_t<V>>
 
       friend constexpr bool operator== (iterator const &x, iterator const &y)
       {
-        return x.current_ == y.next_;
+        return x.current_ == y.current_;
       }
       friend constexpr bool operator== (iterator const &x, std::default_sentinel_t)
       {
@@ -384,7 +384,7 @@ template <typename Db>
   };
 
 template <typename Db>
-  struct decoded_adaptor : public std::ranges::range_adaptor_closure<decoding_adaptor<Db>>
+  struct decoded_adaptor : public std::ranges::range_adaptor_closure<decoded_adaptor<Db>>
   {
     template <std::ranges::viewable_range R>
       constexpr auto operator() (R &&r) const
@@ -397,7 +397,7 @@ template <typename Db>
 export {
 
 template <typename Db> inline constexpr decoding_adaptor<Db> decoding {};
-template <typename Db> inline constexpr decoding_adaptor<Db> decoded {};
+template <typename Db> inline constexpr decoded_adaptor<Db> decoded {};
 
 } // export
 

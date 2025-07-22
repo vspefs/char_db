@@ -1,4 +1,4 @@
-module vspefs.char_db : utils;
+export module vspefs.char_db : utils;
 
 import std;
 

@@ -1,0 +1,49 @@
+= TODO
+
+This document outlines planned features and improvements for the char_db library.
+
+== Views and Range Adaptors
+
+=== Compile-time Views
+* **`char_db::views::comptime_decoded`** - A constexpr-compatible decoded view that can be stored and used at compile time
+
+=== Encoding Views
+* **`char_db::views::encoding`** - A view that encodes Unicode code points into the specified encoding
+* **`char_db::views::encoded`** - A view that performs encoding but completes heavy computations during construction for better runtime performance
+* **`char_db::views::code_points`** - A view that directly provides Unicode code points from encoded sequences
+* **`char_db::views::encoding_convert`** - A view that converts between different character encodings (e.g., UTF-8 to UTF-16)
+
+== Coroutine Support (Generators)
+
+* **`char_db::co::decoding`** - A generator leveraging C++20 coroutines and the standard generator facility for lazy decoding
+* Additional generators for encoding, validation, and transformation operations
+
+== Execution Support (Senders/Receivers)
+
+* **`char_db::exec::decoding`** - A sender that leverages the standard execution facility for asynchronous character processing
+* Additional senders for parallel encoding/decoding operations
+
+== General Improvements
+
+=== Code Quality and Standards
+* Improve overall code quality and ranges implementation
+* Enhance error handling and exception safety
+* Add unit tests and benchmarks
+
+=== Performance Optimizations
+* Compile-time string processing improvements
+* Memory allocation optimizations
+
+=== Documentation and Examples
+* Comprehensive API documentation
+* More usage examples and tutorials
+* Performance comparison with other libraries
+
+=== Platform Support
+* Cross-platform testing and validation
+* Compiler compatibility testing (GCC, Clang, MSVC)
+* Endianness handling for multi-byte encodings
+
+=== Waiting For...
+* C++26 Contracts
+* C++26 SIMD

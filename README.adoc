@@ -1,0 +1,111 @@
+= char_db (Work in Progress)
+
+A modern C++20 module library for character encoding and decoding, built around native language features like `char8_t`, `char16_t`, `char32_t`, and ranges, with comprehensive support for UTF-8, UTF-16, and UTF-32.
+
+This library is currently under development, providing warm welcome and vast room for contribution, bug fixes, and improvements. See link:TODO.adoc[TODO] for a comprehensive to-do list.
+
+== Features
+
+* **C++20 module** - Zero dependencies except the standard library
+* **Unicode support** - Built-in character validation and code point conversion for UTF-8, UTF-16, UTF-32
+* **Range-based views** - Iterate over subsequences that encode Unicode characters
+* **Compile-time design** - Designed for constexpr and compile-time usage (implementation in progress)
+* **CMake integration** - Built exclusively with C++20 modules, requiring CMake as the build system
+
+== Usage
+
+After installation, find the package and link against it in CMake:
+
+[source,cmake]
+----
+find_package(char_db REQUIRED)
+
+# ...
+
+target_link_libraries(
+    your_awesome_target
+    PRIVATE
+        char_db::char_db
+)
+----
+
+Then import the module in your source files:
+
+[source,cpp]
+----
+import vspefs.char_db;
+----
+
+=== Example: Iterate over UTF-8 code points in a string
+
+[source,cpp]
+----
+import vspefs.char_db;
+import std;
+
+int
+main()
+{
+  using namespace std::literals::string_view_literals;
+
+  constexpr auto seq = u8"👍 I'm a UTF-8 code unit sequence!! ❤❤"sv;
+  constexpr auto code_points = U"👍 I'm a UTF-8 code unit sequence!! ❤❤"sv;
+
+  for (auto view = seq | char_db::views::decoding<char_db::utf8>;
+       auto const [index, subseq] : view | std::views::enumerate)
+    {
+      std::ranges::for_each (subseq, [](char8_t const code_unit)
+        {
+          std::print("{:#04x} ", static_cast<std::uint8_t> (code_unit));
+        });
+      std::print("-> {} ", static_cast<std::uint32_t> (char_db::utf8::to_code_point (subseq)));
+      std::println("{}", char_db::utf8::to_code_point (subseq) == code_points[index]);
+    }
+}
+----
+
+== Building & Installing
+
+This project uses CMake exclusively:
+
+[source,sh]
+----
+cmake -B build
+cmake --build build
+cmake --install build
+----
+
+To specify the library build type:
+
+[source,sh]
+----
+# Build as a shared library
+cmake -B build -DBUILD_SHARED_LIBS=ON
+cmake --build build
+
+# Build as a static library
+cmake -B build -DBUILD_SHARED_LIBS=OFF
+cmake --build build
+----
+
+== Current API Overview
+
+`char_db::utf8`, `char_db::utf16`, `char_db::utf32`::
+Static interfaces for encoding/decoding and validation
+
+`char_db::checked<Db, Policy>`::
+`std::expected`-focused wrappers for encoding/decoding and validation (incomplete)
+
+`char_db::views::decoding<Db>`::
+Range adaptor for decoding code unit sequences into code points
+
+`char_db::views::decoded<Db>`::
+Range adaptor for iterating decoded code unit sequences that represent valid Unicode code points
+
+== Contributing
+
+Contributions are welcome! Please note that this project uses a custom version of GNU Code Style. You may use any coding style in your contributions, as code will be reformatted before merging. If you're not fond of GNU Style, you'll have to understand—everyone has their preferences.
+
+== License
+
+This project is licensed under the AGPL-3.0 License. See link:LICENSE[LICENSE] for details.
