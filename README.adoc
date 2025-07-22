@@ -14,6 +14,8 @@ This library is currently under development, providing warm welcome and vast roo
 
 == Usage
 
+Your project must use exact C++23 standard and no additional compiler flag that will break CMI compatibility, because CMake devs and C++ community haven't really come up with a good enough model for module distribution.
+
 After installation, find the package and link against it in CMake:
 
 [source,cmake]
